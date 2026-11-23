@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>User Registration</title>
+<style>
+:root{--bg:#eef2f5;--card:#fff;--ink:#1d2b36;--muted:#5d6b77;--line:#cdd7de;--accent:#0e6b73;--accent-d:#0a4f55;--err:#b3261e}
+@media (prefers-color-scheme:dark){:root{--bg:#12191e;--card:#1b252c;--ink:#e6eef2;--muted:#9aaab5;--line:#34444e;--accent:#4fb8c1;--accent-d:#7fd0d7;--err:#ff8a80}}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:var(--bg);color:var(--ink);font:16px/1.5 "Segoe UI",system-ui,sans-serif}
+.card{width:100%;max-width:640px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:32px}
+h1{margin:0 0 4px;font-size:1.6rem}
+.sub{margin:0 0 24px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.full{grid-column:1/-1}
+label,.legend{display:block;font-weight:600;margin-bottom:4px;font-size:.92rem}
+input[type=text],input[type=tel],input[type=email],select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:transparent;color:var(--ink);font:inherit}
+input:focus,select:focus,button:focus-visible{outline:3px solid var(--accent);outline-offset:1px}
+.radios{display:flex;gap:20px;padding-top:6px}
+.radios label{font-weight:400;display:flex;align-items:center;gap:6px;margin:0}
+.error{display:block;min-height:1.1em;color:var(--err);font-size:.82rem;margin-top:2px}
+.actions{display:flex;gap:12px;margin-top:8px}
+button,.btn{padding:11px 22px;border-radius:6px;border:1px solid var(--accent);background:var(--accent);color:#fff;font:600 1rem inherit;cursor:pointer;text-decoration:none;display:inline-block}
+@media (prefers-color-scheme:dark){button,.btn{color:#08181a}}
+button.secondary,.btn.secondary{background:transparent;color:var(--accent-d)}
+dl{display:grid;grid-template-columns:140px 1fr;margin:0}
+dt{color:var(--muted);padding:10px 0;border-bottom:1px solid var(--line)}
+dd{margin:0;padding:10px 0;border-bottom:1px solid var(--line);font-weight:600;word-break:break-word}
+.empty{color:var(--muted)}
+@media (max-width:560px){.grid{grid-template-columns:1fr}dl{grid-template-columns:110px 1fr}.card{padding:22px}}
+</style>
+</head>
+<body>
+<main class="card">
+  <h1>User registration</h1>
+  <p class="sub">Fill in your details. They will be shown on the next page.</p>
+
+  <form id="userForm" novalidate>
+    <div class="grid">
+      <div class="full">
+        <label for="name">Full name</label>
+        <input type="text" id="name" name="name" autocomplete="name">
+        <span class="error" id="err-name"></span>
+      </div>
+
+      <div>
+        <span class="legend">Gender</span>
+        <div class="radios" role="radiogroup" aria-label="Gender">
+          <label><input type="radio" name="gender" value="Male"> Male</label>
+          <label><input type="radio" name="gender" value="Female"> Female</label>
+          <label><input type="radio" name="gender" value="Other"> Other</label>
+        </div>
+        <span class="error" id="err-gender"></span>
+      </div>
+
+      <div>
+        <label for="mobile">Mobile number</label>
+        <input type="tel" id="mobile" name="mobile" inputmode="numeric" maxlength="10" placeholder="10 digits" autocomplete="tel">
+        <span class="error" id="err-mobile"></span>
+      </div>
+
+      <div class="full">
+        <label for="email">Email ID</label>
+        <input type="email" id="email" name="email" autocomplete="email">
+        <span class="error" id="err-email"></span>
+      </div>
+
+      <div>
+        <label for="country">Country</label>
+        <select id="country" name="country">
+          <option value="">Select country</option>
+          <option>India</option>
+          <option>United States</option>
+          <option>United Kingdom</option>
+        </select>
+        <span class="error" id="err-country"></span>
+      </div>
+
+      <div>
+        <label for="state">State</label>
+        <select id="state" name="state" disabled>
+          <option value="">Select country first</option>
+        </select>
+        <span class="error" id="err-state"></span>
+      </div>
+
+      <div class="full">
+        <label for="city">City</label>
+        <input type="text" id="city" name="city" autocomplete="address-level2">
+        <span class="error" id="err-city"></span>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="submit">Save and view details</button>
+      <button type="reset" class="secondary">Clear form</button>
+    </div>
+  </form>
+</main>
+
+<script>
+// Country -> states list (extend as needed)
+const states = {
+  "India": ["Karnataka", "Tamil Nadu", "Kerala", "Maharashtra", "Delhi", "Telangana", "Gujarat"],
+  "United States": ["California", "Texas", "New York", "Florida", "Washington"],
+  "United Kingdom": ["England", "Scotland", "Wales", "Northern Ireland"]
+};
+
+const form = document.getElementById("userForm");
+const country = document.getElementById("country");
+const state = document.getElementById("state");
+
+// Fill the state dropdown based on the chosen country
+country.addEventListener("change", () => {
+  state.innerHTML = "";
+  const list = states[country.value] || [];
+  state.add(new Option(list.length ? "Select state" : "Select country first", ""));
+  list.forEach(s => state.add(new Option(s, s)));
+  state.disabled = list.length === 0;
+});
+
+form.addEventListener("reset", () => {
+  setTimeout(() => {
+    state.innerHTML = '<option value="">Select country first</option>';
+    state.disabled = true;
+    document.querySelectorAll(".error").forEach(e => e.textContent = "");
+  });
+});
+
+function showError(id, msg) { document.getElementById("err-" + id).textContent = msg; }
+
+function validate(d) {
+  document.querySelectorAll(".error").forEach(e => e.textContent = "");
+  let ok = true;
+  if (!/^[A-Za-z][A-Za-z .'-]{1,59}$/.test(d.name)) { showError("name", "Enter your name using letters only."); ok = false; }
+  if (!d.gender) { showError("gender", "Choose a gender."); ok = false; }
+  if (!/^[6-9]\d{9}$/.test(d.mobile)) { showError("mobile", "Enter a 10-digit number starting with 6, 7, 8 or 9."); ok = false; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(d.email)) { showError("email", "Enter a valid email, like name@example.com."); ok = false; }
+  if (!d.country) { showError("country", "Select a country."); ok = false; }
+  if (!d.state) { showError("state", "Select a state."); ok = false; }
+  if (!d.city) { showError("city", "Enter your city."); ok = false; }
+  return ok;
+}
+
+form.addEventListener("submit", e => {
+  e.preventDefault();
+  const d = {
+    name: form.name.value.trim(),
+    gender: (form.gender.value || ""),
+    mobile: form.mobile.value.trim(),
+    email: form.email.value.trim(),
+    city: form.city.value.trim(),
+    state: form.state.value,
+    country: form.country.value
+  };
+  if (!validate(d)) return;
+  // Save the data in the browser, then open the next page
+  sessionStorage.setItem("userData", JSON.stringify(d));
+  window.location.href = "display.html";
+});
+</script>
+</body>
+</html>
